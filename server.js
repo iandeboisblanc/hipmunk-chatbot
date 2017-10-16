@@ -15,8 +15,15 @@ server.use((req, res, next) => {
 server.use(formidable());
 
 server.post('/chat/messages', (req, res) => {
-  console.log('Got message!');
+  const message = 'Example response';
+  const response = {
+    messages: [{
+      type: 'text',
+      text: message
+    }]
+  };
   console.log(req.fields)
+  res.send(response);
 })
 
 server.listen(PORT, () => {
