@@ -1,7 +1,8 @@
 const express = require('express');
 const formidable = require('express-formidable');
+const config = require('./config.json');
 
-const PORT = process.env.npm_package_config_port;
+const PORT = config.PORT;
 
 const server = express();
 
