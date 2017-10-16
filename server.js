@@ -19,15 +19,8 @@ server.use(formidable());
 
 // Handle new messages
 server.post('/chat/messages', (req, res) => {
-  console.log(req.fields)
   bot.generateResponse(req.fields).then((response) => {
     res.send(response);
-  }).catch((error) => {
-    console.error(error);
-    res.send({ messages: [{
-      type: 'text',
-      text: 'I\'m sorry, something went wrong. Please try again!'
-    }]});
   });
 })
 
