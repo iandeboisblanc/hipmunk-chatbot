@@ -10,9 +10,6 @@
     "start": "node server.js",
     "start-dev": "nodemon server.js"
   },
-  "config": {
-    "port": 9000
-  },
   "dependencies": {
     "express": "^4.16.2",
     "express-formidable": "^1.0.0"
