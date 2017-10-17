@@ -15,7 +15,13 @@ To use, follow the setup instructions below to start the server, then visit the 
 The chatbot requires at least Node v7, though Node v8 is recommended. You can download and install Node
 [here](https://nodejs.org/en/), or manage multiple versions using [NVM](https://github.com/creationix/nvm).
 
-#### 2. Setup config
+#### 3. Install packages
+
+```
+yarn install
+```
+
+### Setup Config
 
 The chatbot requires API keys for Google Maps and Dark Sky. These need to be set in `config.json`.
 An example of the required config file has been provided as `config.example.json`. To generate the real config file,
@@ -24,12 +30,6 @@ navigate to the project's root directory and run:
 cp config.example.json config.json
 ```
 Then update `config.json` to include your API keys.
-
-#### 3. Install packages
-
-```
-yarn install
-```
 
 ### Start Server
 
