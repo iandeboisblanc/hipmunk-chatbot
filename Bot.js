@@ -36,9 +36,10 @@ class Bot {
     const clauseRegex = /(.*)(?=\s+(weather|the weather))/;
     const lowerCaseText = message.text.toLowerCase();
 
-    const location = lowerCaseText.match(sentenceRegex) || lowerCaseText.match(clauseRegex);
-    if (!location) { return this.defaultReply() } // Not recognized as weather prompt
+    const matches = lowerCaseText.match(sentenceRegex) || lowerCaseText.match(clauseRegex);
+    if (!matches) { return this.defaultReply() } // Not recognized as weather prompt
 
+    const location = matches[1];
     const latLng = await this._getLatLng(location);
     if (!latLng) { return this.defaultReply('weather') }
 
