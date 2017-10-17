@@ -39,7 +39,7 @@ class Bot {
     const matches = lowerCaseText.match(sentenceRegex) || lowerCaseText.match(clauseRegex);
     if (!matches) { return this.defaultReply() } // Not recognized as weather prompt
 
-    const location = matches[1];
+    const location = matches[1]; // Matched group
     const latLng = await this._getLatLng(location);
     if (!latLng) { return this.defaultReply('weather') }
 
