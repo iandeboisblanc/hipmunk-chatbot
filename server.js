@@ -6,7 +6,10 @@ const PORT = config.PORT;
 
 const server = express();
 const Bot = require('./Bot.js');
-const bot = new Bot();
+const bot = new Bot({
+  mapsApiKey: config.GMAPS_API_KEY,
+  weatherApiKey: config.DARK_SKY_API_KEY
+});
 
 // Allow cross-origin requests
 server.use((req, res, next) => {

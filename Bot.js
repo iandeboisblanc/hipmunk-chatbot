@@ -1,7 +1,10 @@
 const fetch = require('node-fetch');
-const config = require('./config.json');
 
 class Bot {
+  constructor({ mapsApiKey, weatherApiKey }) {
+    this.mapsApiKey = mapsApiKey;
+    this.weatherApiKey = weatherApiKey;
+  }
 
   async generateResponse(message) {
     try {
@@ -31,16 +34,17 @@ class Bot {
     const sentenceRegex = /(?:whats|what is|hows|what's|how's|how is)?\s*(?:weather|the weather)\s+(?:of|in)?\s?(.*)$/;
     // Match phrase like: <Location> (weather)
     const clauseRegex = /(.*)(?=\s+(weather|the weather))/;
-
     const lowerCaseText = message.text.toLowerCase();
-    const location = lowerCaseText.match(sentenceRegex) || lowerCaseText.match(clauseRegex);
 
-    if (!location) { return this.defaultReply() }
+    const location = lowerCaseText.match(sentenceRegex) || lowerCaseText.match(clauseRegex);
+    if (!location) { return this.defaultReply() } // Not recognized as weather prompt
 
     const latLng = await this._getLatLng(location);
     if (!latLng) { return this.defaultReply('weather') }
+
     const weather = await this._getWeather(latLng);
     if (!weather) { return this.defaultReply('weather') }
+
     return {
       messages: [{
         type: 'text',
@@ -50,7 +54,7 @@ class Bot {
   }
 
   _getLatLng(location) {
-    const queryParams = `address=${location}&key=${config.GMAPS_API_KEY}`;
+    const queryParams = `address=${location}&key=${this.mapsApiKey}`;
     return fetch(`https://maps.googleapis.com/maps/api/geocode/json?${queryParams}`)
     .then(res => res.json())
     .then(body => {
@@ -66,7 +70,7 @@ class Bot {
 
   _getWeather({ lat, lng }) {
     const queryParams = 'exclude=minutely,hourly'
-    return fetch(`https://api.darksky.net/forecast/${config.DARK_SKY_API_KEY}/${lat},${lng}?${queryParams}`)
+    return fetch(`https://api.darksky.net/forecast/${this.weatherApiKey}/${lat},${lng}?${queryParams}`)
     .then(res => res.json())
     .then(body => {
       return body.currently;
@@ -89,7 +93,7 @@ class Bot {
         return {
           messages: [{
             type: 'text',
-            text: 'I\m sorry, I had trouble finding the weather there. Perhaps try a different location'
+            text: 'I\'m sorry, I had trouble finding the weather there. Perhaps try a different location'
           }]
         }
       default:
@@ -109,6 +113,9 @@ module.exports = Bot;
 Potential improvements:
 - Remember users, so can give customized responses / remember locations
 - Multi-message context (ex: "What's the weather" > "Where?" > "In Chicago")
+- Rich responses for weather (https://erikflowers.github.io/weather-icons/)
+- Confirm location with name or map in response
 - Better/more-robust language processing
 - More varied replies (esp. default replies)
+- Rework so it can be extended more easily (handle more than just weather)
 */
