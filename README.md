@@ -18,9 +18,8 @@ The chatbot requires at least Node v7, though Node v8 is recommended. You can do
 #### 2. Setup config
 
 The chatbot requires API keys for Google Maps and Dark Sky. These need to be set in `config.json`.
-
-An example of the required config file is provided as `config.example.json`. To generate the real config file,
-run:
+An example of the required config file has been provided as `config.example.json`. To generate the real config file,
+navigate to the project's root directory and run:
 ```
 cp config.example.json config.json
 ```
@@ -34,11 +33,10 @@ yarn install
 
 ### Start Server
 
-In order to interact with the Lessenger UI, the webserver is expected to run on `localhost:9000`.
-To start the node process, run:
 ```
 yarn start
 ```
+**NOTE:** In order to interact with the Lessenger UI, the webserver is expected to run on `localhost:9000`.
 
 During development, it may be useful to run the process using [nodemon](https://nodemon.io/) instead.
 To run with nodemon, install nodemon then use the command:
