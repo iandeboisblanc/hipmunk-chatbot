@@ -2,13 +2,22 @@ const express = require('express');
 const formidable = require('express-formidable');
 const config = require('./config.json');
 
-const PORT = config.PORT;
+const {
+  PORT,
+  GMAPS_API_KEY,
+  DARK_SKY_API_KEY
+} = config;
+
+if (!PORT || !GMAPS_API_KEY || !DARK_SKY_API_KEY) {
+  console.error('Missing configs! Check config.json')
+  process.exit(1);
+}
 
 const server = express();
 const Bot = require('./Bot.js');
 const bot = new Bot({
-  mapsApiKey: config.GMAPS_API_KEY,
-  weatherApiKey: config.DARK_SKY_API_KEY
+  mapsApiKey: GMAPS_API_KEY,
+  weatherApiKey: DARK_SKY_API_KEY
 });
 
 // Allow cross-origin requests
