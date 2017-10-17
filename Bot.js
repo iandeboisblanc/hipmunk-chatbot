@@ -31,7 +31,7 @@ class Bot {
 
   async handleMessageAction(message) {
     // Match phrase like: (What's) (the weather) (in) <Location>
-    const sentenceRegex = /(?:whats|what is|hows|what's|how's|how is)?\s*(?:weather|the weather)\s+(?:of|in)?\s?(.*)$/;
+    const sentenceRegex = /(?:whats|what is|hows|what's|how's|how is)?\s*(?:weather|the weather)\s+(?:of|in|at|for)?\s?(.*)$/;
     // Match phrase like: <Location> (weather)
     const clauseRegex = /(.*)(?=\s+(weather|the weather))/;
     const lowerCaseText = message.text.toLowerCase();
