@@ -1,0 +1,44 @@
+html, body, #root, .Hipmunk-App {
+  height: 100%;
+}
+
+.Hipmunk-App {
+  background-color: green;
+  display: flex;
+  flex-direction: column;
+}
+
+.hipmunk-header {
+  height: 100px;
+  background-color: blue;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.chat-window {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.messages-section {
+  flex: 1;
+}
+
+.message {
+  padding: 10px;
+  /*background-color: white;*/
+}
+
+.from-client {
+  background-color: grey;
+}
+
+.from-server {
+  background-color: red;
+}
+
+.input-section {
+  height: 80px;
+}
