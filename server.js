@@ -1,6 +1,7 @@
 const express = require('express');
 const formidable = require('express-formidable');
 const config = require('./config.json');
+const { createTfidf, search } = require('./createTfidf');
 
 const {
   PORT,
@@ -12,6 +13,12 @@ if (!PORT || !GMAPS_API_KEY || !DARK_SKY_API_KEY) {
   console.error('Missing configs! Check config.json')
   process.exit(1);
 }
+
+// console.log('starting ds build');
+// const rankedSearchMap = createTfidf();
+// console.log('done');
+// console.log(rankedSearchMap)
+// console.log(search('home town', rankedSearchMap));
 
 const server = express();
 const Bot = require('./Bot.js');

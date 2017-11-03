@@ -1,22 +1,43 @@
 const fetch = require('node-fetch');
+const { createTfidf, search } = require('./createTfidf');
 
 class Bot {
   constructor({ mapsApiKey, weatherApiKey }) {
     this.mapsApiKey = mapsApiKey;
     this.weatherApiKey = weatherApiKey;
+    this.searchMap = createTfidf();
+    this.users = {};
   }
 
   async generateResponse(message) {
     try {
+      let messages = [];
       switch (message.action) {
         case 'join':
-          return await this.handleJoinAction(message);
+          this.users[message.user_id] = message.name;
+          return this.handleJoinAction(message);
         case 'message':
-          return await this.handleMessageAction(message);
+          let textMessages = await this.handleMessageAction(message);
+          messages = textMessages;
+          break;
       }
+      return this.craftReply(message.user_id, messages);
     } catch(e) {
       console.error(`Error generating response: "${e}"`);
       return this.defaultReply('error');
+    }
+  }
+
+  craftReply(userId, messageArr) {
+    // look up user
+    const user = this.users[userId];
+    let addressUser = true;
+    messageArr[0] = `${user}, ${messageArr[0]}`;
+    return {
+      messages: [{
+        type: 'text',
+        text: messageArr[0],
+      }],
     }
   }
 
@@ -29,29 +50,50 @@ class Bot {
     };
   }
 
+  handleSearch(message) {
+    const searchTerm = message.text.replace('search ', '');
+    const results = search(searchTerm, this.searchMap).join('\n')
+    return {
+      messages: [{
+        type: 'text',
+        text: `${results}`
+      }]
+    };
+  }
+
   async handleMessageAction(message) {
-    // Match phrase like: (What's) (the weather) (in) <Location>
-    const sentenceRegex = /(?:whats|what is|hows|what's|how's|how is)?\s*(?:weather|the weather)\s+(?:of|in|at|for)?\s?(.*)$/;
+    // catch 'search ___'
+    if (message.text.indexOf('search') > -1) {
+      return this.handleSearch(message);
+    }
+
+    // Match phrase like: (What's(?)) (the weather) (in(?)) <Location>
+    const sentenceRegex = /^(?:whats|what is|hows|what's|how's|how is)?\s*(?:weather|the weather)\s+(?:of|in|at|for)?\s*(.*)$/;
     // Match phrase like: <Location> (weather)
-    const clauseRegex = /(.*)(?=\s+(weather|the weather))/;
-    const lowerCaseText = message.text.toLowerCase();
+    const clauseRegex = /(.*)(?=\s+(weather|the weather)\s*)/;
+    let lowerCaseText = message.text.toLowerCase();
+    const includeTomorrow = lowerCaseText.indexOf('tomorrow') > -1;
+    lowerCaseText = lowerCaseText.replace('tomorrow', '');
 
     const matches = lowerCaseText.match(sentenceRegex) || lowerCaseText.match(clauseRegex);
     if (!matches) { return this.defaultReply() } // Not recognized as weather prompt
 
     const location = matches[1]; // Matched group
-    const latLng = await this._getLatLng(location);
+    const { latLng, readableLocation } = await this._getLatLng(location);
     if (!latLng) { return this.defaultReply('weather') }
 
     const weather = await this._getWeather(latLng);
     if (!weather) { return this.defaultReply('weather') }
 
-    return {
-      messages: [{
-        type: 'text',
-        text: `Currently it is ${weather.temperature}F. ${weather.summary}.`
-      }]
-    };
+    if (includeTomorrow) {
+      return [
+        `The weather for ${readableLocation} tomorrow will be a high of ${weather.tomorrow.temperatureMax}F and a low of ${weather.tomorrow.temperatureMin}F. ${weather.tomorrow.summary}.`
+      ]
+    }
+
+    return [
+      `Currently it is ${weather.currently.temperature}F at ${readableLocation}. ${weather.currently.summary}.`
+    ];
   }
 
   _getLatLng(location) {
@@ -62,7 +104,10 @@ class Bot {
       if (body.status !== 'OK') {
         return Promise.reject(`${body.status}--${body.error_message}`)
       }
-      return body.results[0].geometry.location;
+      return {
+        latLng: body.results[0].geometry.location,
+        readableLocation: body.results[0].formatted_address
+      };
     }).catch(err => {
       console.error(`Error getting location from GMAPS: "${err}"`);
       return null;
@@ -74,7 +119,10 @@ class Bot {
     return fetch(`https://api.darksky.net/forecast/${this.weatherApiKey}/${lat},${lng}?${queryParams}`)
     .then(res => res.json())
     .then(body => {
-      return body.currently;
+      return {
+        currently: body.currently,
+        tomorrow: body.daily.data[1]
+      };
     }).catch(err => {
       console.error(`Error getting weather from Dark Sky: "${err}"`);
       return null;
@@ -115,7 +163,6 @@ Potential improvements:
 - Remember users, so can give customized responses / remember locations
 - Multi-message context (ex: "What's the weather" > "Where?" > "In Chicago")
 - Rich responses for weather (https://erikflowers.github.io/weather-icons/)
-- Confirm location with name or map in response
 - Better/more-robust language processing
 - More varied replies (esp. default replies)
 - Rework so it can be extended more easily (handle more than just weather)
